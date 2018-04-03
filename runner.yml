@@ -1,0 +1,356 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: 'Cache'
+        Parameters: ['CacheBucketName']
+      - Label:
+          default: 'EC2'
+        Parameters: ['VpcId', 'ManagerImageId', 'ManagerInstanceType', 'ManagerKeyPair', 'GitlabRunnerInstanceType']
+      - Label:
+          default: 'GitLab'
+        Parameters: ['GitlabUrl', 'GitlabToken']
+      - Label:
+          default: 'Runner'
+        Parameters: ['GitlabMaxConcurrentBuilds', 'GitlabIdleCount', 'GitlabIdleTime', 'GitlabOffPeakIdleCount', 'GitlabOffPeakIdleTime', 'GitlabOffPeakTimezone']
+
+Parameters:
+  CacheBucketName:
+    Type: 'String'
+    Description: |
+      Name of the S3 bucket to be created to store runners cache. Leave empty to autogenerate a name.
+    Default: ''
+  VpcId:
+    Type: 'AWS::EC2::VPC::Id'
+    Description: |
+      ID of VPC where resources will be created.
+  ManagerImageId:
+    Type: 'AWS::EC2::Image::Id'
+    Description: |
+      AMI for GitLab Runner's manager instance.
+  ManagerInstanceType:
+    Type: 'String'
+    Description: |
+      Instance type for GitLab Runners' manager.
+    AllowedValues: ['t2.nano', 't2.micro', 't2.small', 't2.medium', 't2.large']
+    Default: 't2.nano'
+  ManagerKeyPair:
+    Type: 'AWS::EC2::KeyPair::KeyName'
+    Description: |
+      Key pair that is authorized to access GitLab Runner's manager instance via SSH.
+  GitlabUrl:
+    Type: 'String'
+    Description: |
+      GitLab instance URL.
+    Default: 'https://gitlab.com/'
+  GitlabToken:
+    Type: 'String'
+    Description: |
+      GitLab Runner token.
+    NoEcho: true
+  GitlabRunnerInstanceType:
+    Type: 'String'
+    Description: |
+      Instance type for GitLab Runners.
+    AllowedValues: ['t2.nano', 't2.micro', 't2.small', 't2.medium', 't2.large']
+    Default: 't2.micro'
+  GitlabMaxConcurrentBuilds:
+    Type: 'Number'
+    Description: |
+      Maximum number of concurrent builds during working hours.
+    MinValue: 1
+    Default: 10
+  GitlabIdleCount:
+    Type: 'Number'
+    Description: |
+      Number of idle hosts during working hours.
+    MinValue: 0
+    Default: 1
+  GitlabIdleTime:
+    Type: 'Number'
+    Description: |
+      Number of seconds of inactivity before an idle host is shut down during working hours.
+    MinValue: 1
+    Default: 1800
+  GitlabOffPeakTimezone:
+    Type: 'String'
+    Description: |
+      Timezone in which non-working hours are evaluated.
+    Default: 'Europe/Rome'
+  GitlabOffPeakIdleCount:
+    Type: 'Number'
+    Description: |
+      Number of idle hosts during non-working hours.
+    MinValue: 0
+    Default: 0
+  GitlabOffPeakIdleTime:
+    Type: 'Number'
+    Description: |
+      Number of seconds of inactivity before an idle host is shut down during non-working hours.
+    MinValue: 1
+    Default: 1200
+
+Conditions:
+  GivenBucketName: !Not [!Equals ['', !Ref 'CacheBucketName']]
+
+Outputs:
+  CacheBucketName:
+    Description: |
+      Name of created S3 bucket.
+    Value: !Ref 'CacheBucket'
+  ManagerIP:
+    Description: |
+      IP of manager instance.
+    Value: !Ref 'ManagerEIP'
+
+Resources:
+  ####################################
+  ### S3 Bucket for Runners' cache ###
+  ####################################
+  CacheBucket:
+    Type: 'AWS::S3::Bucket'
+    Properties:
+      BucketName: !If
+        - 'GivenBucketName'
+        - !Ref 'CacheBucketName'
+        - !Ref 'AWS::NoValue'
+
+  #############################
+  ### GitLab Runner Manager ###
+  #############################
+  ManagerSecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      VpcId: !Ref 'VpcId'
+      GroupName: !Sub '${AWS::StackName}-ManagerSecurityGroup'
+      GroupDescription: 'Security group for GitLab Runners Manager.'
+      SecurityGroupIngress:
+        - Description: 'SSH traffic'
+          IpProtocol: 'tcp'
+          FromPort: 22
+          ToPort: 22
+          CidrIp: '0.0.0.0/0'
+  ManagerRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: 'Allow'
+            Principal:
+              Service:
+                - 'ec2.amazonaws.com'
+            Action:
+              - 'sts:AssumeRole'
+      Policies:
+        - PolicyName: Cache
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: 'Allow'
+                Action:
+                  - 's3:ListObjects*'
+                  - 's3:GetObject*'
+                  - 's3:DeleteObject*'
+                  - 's3:PutObject*'
+                Resource:
+                  - !Sub '${CacheBucket.Arn}/*'
+              - Effect: 'Allow'
+                Action:
+                  - 's3:ListBucket'
+                Resource:
+                  - !GetAtt 'CacheBucket.Arn'
+        - PolicyName: Runners
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: 'Allow'
+                Action:
+                  - 'ec2:CreateKeyPair'
+                  - 'ec2:DeleteKeyPair'
+                  - 'ec2:ImportKeyPair'
+                  - 'ec2:Describe*'
+                  - 'ec2:CreateTags'
+                Resource:
+                  - '*'
+              - Effect: 'Allow'
+                Action:
+                  - 'ec2:RunInstances'
+                Resource:
+                  - '*'
+                Condition:
+                  StringEqualsIfExists:
+                    'ec2:InstanceType': !Ref 'GitlabRunnerInstanceType'
+                    'ec2:Region': !Ref 'AWS::Region'
+                    'ec2:Tenancy': 'default'
+                  ArnEqualsIfExists:
+                    'ec2:Vpc': !Sub 'arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:vpc/${VpcId}'
+              - Effect: 'Allow'
+                Action:
+                  - 'ec2:TerminateInstances'
+                  - 'ec2:StopInstances'
+                  - 'ec2:StartInstances'
+                  - 'ec2:RebootInstances'
+                Condition:
+                  StringLike:
+                    'ec2:ResourceTag/Name': '*gitlab-docker-machine-*'
+                Resource:
+                  - '*'
+  ManagerInstanceProfile:
+    Type: 'AWS::IAM::InstanceProfile'
+    Properties:
+      Roles:
+        - !Ref 'ManagerRole'
+  Manager:
+    Type: 'AWS::EC2::Instance'
+    Properties:
+      ImageId: !Ref 'ManagerImageId'
+      InstanceType: !Ref 'ManagerInstanceType'
+      KeyName: !Ref 'ManagerKeyPair'
+      IamInstanceProfile: !Ref 'ManagerInstanceProfile'
+      SecurityGroupIds:
+        - !Ref 'ManagerSecurityGroup'
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash -xe
+          yum update aws-cfn-bootstrap
+
+          # Install the files and packages from the metadata
+          /opt/aws/bin/cfn-init --stack '${AWS::StackName}' --region '${AWS::Region}' --resource Manager --configsets default
+
+          # Signal the status from cfn-init
+          /opt/aws/bin/cfn-signal -e $? --stack '${AWS::StackName}' --region '${AWS::Region}' --resource Manager
+    Metadata:
+      'AWS::CloudFormation::Init':
+        configSets:
+          install:
+            - 'repositories'
+            - 'packages'
+          config:
+            - 'config'
+          default:
+            - ConfigSet: 'install'
+            - ConfigSet: 'config'
+
+        repositories:
+          commands:
+            '10-gitlab-runner':
+              command: 'curl -L https://packages.gitlab.com/install/repositories/runner/gitlab-runner/script.rpm.sh | bash'
+        packages:
+          packages:
+            yum:
+              'docker': []
+              'gitlab-runner': []
+          files:
+            '/etc/cfn/cfn-hup.conf':
+              owner: 'root'
+              group: 'root'
+              mode: '000400'
+              content: !Sub |
+                [main]
+                stack=${AWS::StackId}
+                region=${AWS::Region}
+            '/etc/cfn/hooks.d/cfn-auto-reloader.conf':
+              content: !Sub |
+                [cfn-auto-reloader-hook]
+                triggers=post.update
+                path=Resources.Manager.Metadata.AWS::CloudFormation::Init
+                action=/opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --region ${AWS::Region} --resource Manager --configsets default
+                runas=root
+          commands:
+            10-docker-machine:
+              command: 'curl -L https://github.com/docker/machine/releases/download/v0.14.0/docker-machine-`uname -s`-`uname -m` > /tmp/docker-machine && install /tmp/docker-machine /usr/bin/docker-machine'
+            20-gitlab-runner-start:
+              command: 'gitlab-runner start'
+          services:
+            sysvinit:
+              'cfn-hup':
+                enabled: 'true'
+                ensureRunning: 'true'
+                files:
+                  - '/etc/cfn/cfn-hup.conf'
+                  - '/etc/cfn/hooks.d/cfn-auto-reloader.conf'
+        config:
+          files:
+            '/etc/gitlab-runner/config.toml':
+              owner: 'gitlab-runner'
+              group: 'gitlab-runner'
+              mode: '000644'
+              content: !Sub |
+                concurrent = ${GitlabMaxConcurrentBuilds}
+                check_interval = 0
+
+                [[runners]]
+                  name = "${AWS::StackName}"
+                  url = "${GitlabUrl}"
+                  token = "${GitlabToken}"
+                  executor = "docker+machine"
+                  [runners.docker]
+                    tls_verify = false
+                    image = "ubuntu:latest"
+                    privileged = true
+                    disable_cache = true
+                    volumes = ["/cache"]
+                    shm_size = 0
+                  [runners.cache]
+                    Type = "s3"
+                    ServerAddress = "s3.${AWS::URLSuffix}"
+                    BucketName = "${CacheBucket}"
+                    BucketLocation = "${AWS::Region}"
+                    Shared = true
+                  [runners.machine]
+                    IdleCount = ${GitlabIdleCount}
+                    IdleTime = ${GitlabIdleTime}
+                    MaxBuilds = ${GitlabMaxConcurrentBuilds}
+                    MachineDriver = "amazonec2"
+                    MachineName = "gitlab-docker-machine-%s"
+                    MachineOptions = ["amazonec2-instance-type=${GitlabRunnerInstanceType}", "amazonec2-region=${AWS::Region}", "amazonec2-vpc-id=${VpcId}", "amazonec2-security-group=${AWS::StackName}-RunnersSecurityGroup", "amazonec2-use-private-address=true"]
+                    OffPeakTimezone = "${GitlabOffPeakTimezone}"
+                    OffPeakPeriods = ["* * 0-9,18-23 * * mon-fri *", "* * * * * sat,sun *"]
+                    OffPeakIdleCount = ${GitlabOffPeakIdleCount}
+                    OffPeakIdleTime = ${GitlabOffPeakIdleTime}
+          commands:
+            10-restart:
+              command: gitlab-runner restart
+    CreationPolicy:
+      ResourceSignal:
+        Timeout: 'PT15M'
+    DependsOn:
+      - 'RunnersSecurityGroup'
+  ManagerEIP:
+    Type: 'AWS::EC2::EIP'
+    Properties:
+      Domain: 'vpc'
+      InstanceId: !Ref 'Manager'
+
+  ######################
+  ### GitLab Runners ###
+  ######################
+  RunnersSecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      VpcId: !Ref 'VpcId'
+      GroupName: !Sub '${AWS::StackName}-RunnersSecurityGroup'
+      GroupDescription: 'Security group for GitLab Runners.'
+      SecurityGroupIngress:
+        - Description: 'SSH traffic from Manager'
+          IpProtocol: 'tcp'
+          FromPort: 22
+          ToPort: 22
+          SourceSecurityGroupId: !Ref 'ManagerSecurityGroup'
+        - Description: 'Docker traffic from Manager'
+          IpProtocol: 'tcp'
+          FromPort: 2376
+          ToPort: 2376
+          SourceSecurityGroupId: !Ref 'ManagerSecurityGroup'
+        - Description: 'Traffic from Manager'
+          IpProtocol: -1
+          SourceSecurityGroupId: !Ref 'ManagerSecurityGroup'
+  RunnersSecurityGroupRule:
+    Type: 'AWS::EC2::SecurityGroupIngress'
+    Properties:
+      GroupId: !Ref 'RunnersSecurityGroup'
+      Description: 'Traffic from other Runners'
+      IpProtocol: -1
+      SourceSecurityGroupId: !Ref 'RunnersSecurityGroup'
