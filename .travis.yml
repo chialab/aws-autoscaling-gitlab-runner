@@ -23,7 +23,7 @@ deploy:
     skip_cleanup: true
     local_dir: 'templates'
     on:
-      repo: 'chialab/aws-autoscaling-gitlab-runner'
+      repo: 'Chialab/aws-autoscaling-gitlab-runner'
   # Deploy templates in `s3://thebucket/org/repo/commit-sha`.
   - provider: 's3'
     access_key_id: '$AWS_ACCESS_KEY_ID'
@@ -35,4 +35,4 @@ deploy:
     skip_cleanup: true
     local_dir: 'templates'
     on:
-      repo: 'chialab/aws-autoscaling-gitlab-runner'
+      repo: 'Chialab/aws-autoscaling-gitlab-runner'
