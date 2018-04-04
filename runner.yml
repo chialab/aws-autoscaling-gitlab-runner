@@ -5,7 +5,7 @@ Metadata:
     ParameterGroups:
       - Label:
           default: 'Cache'
-        Parameters: ['CacheBucketName']
+        Parameters: ['CacheBucketName', 'CacheExpirationInDays']
       - Label:
           default: 'EC2'
         Parameters: ['VpcId', 'ManagerImageId', 'ManagerInstanceType', 'ManagerKeyPair', 'GitlabRunnerInstanceType']
@@ -22,6 +22,12 @@ Parameters:
     Description: |
       Name of the S3 bucket to be created to store runners cache. Leave empty to autogenerate a name.
     Default: ''
+  CacheExpirationInDays:
+    Type: 'Number'
+    Description: |
+      Number of days after which a cache item is expired. Set to 0 to disable expiration.
+    MinValue: 0
+    Default: 30
   VpcId:
     Type: 'AWS::EC2::VPC::Id'
     Description: |
@@ -94,6 +100,7 @@ Parameters:
 
 Conditions:
   GivenBucketName: !Not [!Equals ['', !Ref 'CacheBucketName']]
+  ExpireCacheObjects: !Not [!Equals [0, !Ref 'CacheExpirationInDays']]
 
 Outputs:
   CacheBucketName:
@@ -115,6 +122,12 @@ Resources:
       BucketName: !If
         - 'GivenBucketName'
         - !Ref 'CacheBucketName'
+        - !Ref 'AWS::NoValue'
+      LifecycleConfiguration: !If
+        - 'ExpireCacheObjects'
+        - Rules:
+            - Status: 'Enabled'
+              ExpirationInDays: !Ref 'CacheExpirationInDays'
         - !Ref 'AWS::NoValue'
 
   #############################
@@ -276,7 +289,7 @@ Resources:
             '/etc/gitlab-runner/config.toml':
               owner: 'gitlab-runner'
               group: 'gitlab-runner'
-              mode: '000644'
+              mode: '000600'
               content: !Sub |
                 concurrent = ${GitlabMaxConcurrentBuilds}
                 check_interval = 0
@@ -344,13 +357,3 @@ Resources:
           FromPort: 2376
           ToPort: 2376
           SourceSecurityGroupId: !Ref 'ManagerSecurityGroup'
-        - Description: 'Traffic from Manager'
-          IpProtocol: -1
-          SourceSecurityGroupId: !Ref 'ManagerSecurityGroup'
-  RunnersSecurityGroupRule:
-    Type: 'AWS::EC2::SecurityGroupIngress'
-    Properties:
-      GroupId: !Ref 'RunnersSecurityGroup'
-      Description: 'Traffic from other Runners'
-      IpProtocol: -1
-      SourceSecurityGroupId: !Ref 'RunnersSecurityGroup'
