@@ -1,5 +1,5 @@
-Autoscaling GitLab Runner on AWS
-================================
+Autoscaling GitLab Runner on AWS [![Launch this stack on AWS](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home#/stacks/new?stackName=GitLabRunner&templateURL=https://s3-eu-west-1.amazonaws.com/chialab-cloudformation-templates/Chialab/aws-autoscaling-gitlab-runner/master/runner.yml)
+================================================================================
 
 This repository consists of an AWS CloudFormation template that may be used
 to deploy a GitLab runner with Docker executor and auto-scaling based on number
