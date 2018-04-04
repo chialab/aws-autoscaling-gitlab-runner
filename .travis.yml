@@ -1,0 +1,41 @@
+sudo: false
+
+language: python
+
+install:
+  - 'pip install awscli'
+
+script:
+  - |
+    for template in $(ls *.yml); do
+      aws cloudformation validate-template --template-body file://$template
+    done
+
+before_deploy:
+  - 'mkdir -p templates'
+  - 'cp *.yml templates'
+deploy:
+  # Deploy templates in `s3://thebucket/org/repo/branch-name`.
+  - provider: 's3'
+    access_key_id: '$AWS_ACCESS_KEY_ID'
+    secret_access_key: '$AWS_SECRET_ACCESS_KEY'
+    bucket: '$S3_BUCKET'
+    region: '$S3_REGION'
+    upload-dir: '$TRAVIS_REPO_SLUG/$TRAVIS_BRANCH'
+    acl: 'public_read'
+    skip_cleanup: true
+    local_dir: 'templates'
+    on:
+      repo: 'chialab/aws-autoscaling-gitlab-runner'
+  # Deploy templates in `s3://thebucket/org/repo/commit-sha`.
+  - provider: 's3'
+    access_key_id: '$AWS_ACCESS_KEY_ID'
+    secret_access_key: '$AWS_SECRET_ACCESS_KEY'
+    bucket: '$S3_BUCKET'
+    region: '$S3_REGION'
+    upload-dir: '$TRAVIS_REPO_SLUG/$TRAVIS_COMMIT'
+    acl: 'public_read'
+    skip_cleanup: true
+    local_dir: 'templates'
+    on:
+      repo: 'chialab/aws-autoscaling-gitlab-runner'
