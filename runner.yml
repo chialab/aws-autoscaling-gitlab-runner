@@ -346,9 +346,22 @@ Resources:
                     OffPeakPeriods = ["* * 0-9,18-23 * * mon-fri *", "* * * * * sat,sun *"]
                     OffPeakIdleCount = ${GitlabOffPeakIdleCount}
                     OffPeakIdleTime = ${GitlabOffPeakIdleTime}
-          commands:
-            10-restart:
-              command: gitlab-runner restart
+            '/etc/rsyslog.d/25-gitlab-runner.conf':
+              owner: 'root'
+              group: 'root'
+              mode: '000644'
+              content: |
+                :programname, isequal, "gitlab-runner" /var/log/gitlab-runner.log
+          services:
+            sysvinit:
+              gitlab-runner:
+                ensureRunning: 'true'
+                enabled: 'true'
+                files: ['/etc/gitlab-runner/config.toml']
+              rsyslog:
+                ensureRunning: 'true'
+                enabled: 'true'
+                files: ['/etc/rsyslog.d/25-gitlab-runner.conf']
     CreationPolicy:
       ResourceSignal:
         Timeout: 'PT15M'
