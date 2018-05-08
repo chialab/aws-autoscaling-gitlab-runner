@@ -184,9 +184,21 @@ Resources:
                   - 'ec2:DeleteKeyPair'
                   - 'ec2:ImportKeyPair'
                   - 'ec2:Describe*'
+                Resource:
+                  - '*'
+              - Effect: 'Allow'
+                Action:
                   - 'ec2:CreateTags'
                 Resource:
                   - '*'
+                Condition:
+                  StringEquals:
+                    'ec2:Region': !Ref 'AWS::Region'
+                    'ec2:InstanceType': !Ref 'GitlabRunnerInstanceType'
+                  StringLike:
+                    'aws:RequestTag/Name': '*gitlab-docker-machine-*'
+                  ForAllValues:StringEquals:
+                    'aws:TagKeys': ['Name']
               - Effect: 'Allow'
                 Action:
                   - 'ec2:RunInstances'
@@ -199,17 +211,25 @@ Resources:
                     'ec2:Tenancy': 'default'
                   ArnEqualsIfExists:
                     'ec2:Vpc': !Sub 'arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:vpc/${VpcId}'
+                    'ec2:InstanceProfile': !GetAtt 'RunnersInstanceProfile.Arn'
               - Effect: 'Allow'
                 Action:
                   - 'ec2:TerminateInstances'
                   - 'ec2:StopInstances'
                   - 'ec2:StartInstances'
                   - 'ec2:RebootInstances'
+                Resource:
+                  - '*'
                 Condition:
                   StringLike:
                     'ec2:ResourceTag/Name': '*gitlab-docker-machine-*'
+                  ArnEquals:
+                    'ec2:InstanceProfile': !GetAtt 'RunnersInstanceProfile.Arn'
+              - Effect: 'Allow'
+                Action:
+                  - 'iam:PassRole'
                 Resource:
-                  - '*'
+                  - !GetAtt 'RunnersRole.Arn'
   ManagerInstanceProfile:
     Type: 'AWS::IAM::InstanceProfile'
     Properties:
@@ -224,10 +244,13 @@ Resources:
       IamInstanceProfile: !Ref 'ManagerInstanceProfile'
       SecurityGroupIds:
         - !Ref 'ManagerSecurityGroup'
+      Tags:
+        - Key: 'Name'
+          Value: !Ref 'AWS::StackName'
       UserData:
         Fn::Base64: !Sub |
           #!/bin/bash -xe
-          yum update aws-cfn-bootstrap
+          yum update -y aws-cfn-bootstrap
 
           # Install the files and packages from the metadata
           /opt/aws/bin/cfn-init --stack '${AWS::StackName}' --region '${AWS::Region}' --resource Manager --configsets default
@@ -318,14 +341,27 @@ Resources:
                     MaxBuilds = ${GitlabMaxConcurrentBuilds}
                     MachineDriver = "amazonec2"
                     MachineName = "gitlab-docker-machine-%s"
-                    MachineOptions = ["amazonec2-instance-type=${GitlabRunnerInstanceType}", "amazonec2-region=${AWS::Region}", "amazonec2-vpc-id=${VpcId}", "amazonec2-security-group=${AWS::StackName}-RunnersSecurityGroup", "amazonec2-use-private-address=true"]
+                    MachineOptions = ["amazonec2-instance-type=${GitlabRunnerInstanceType}", "amazonec2-region=${AWS::Region}", "amazonec2-vpc-id=${VpcId}", "amazonec2-security-group=${AWS::StackName}-RunnersSecurityGroup", "amazonec2-use-private-address=true", "amazonec2-iam-instance-profile=${RunnersInstanceProfile}"]
                     OffPeakTimezone = "${GitlabOffPeakTimezone}"
                     OffPeakPeriods = ["* * 0-9,18-23 * * mon-fri *", "* * * * * sat,sun *"]
                     OffPeakIdleCount = ${GitlabOffPeakIdleCount}
                     OffPeakIdleTime = ${GitlabOffPeakIdleTime}
-          commands:
-            10-restart:
-              command: gitlab-runner restart
+            '/etc/rsyslog.d/25-gitlab-runner.conf':
+              owner: 'root'
+              group: 'root'
+              mode: '000644'
+              content: |
+                :programname, isequal, "gitlab-runner" /var/log/gitlab-runner.log
+          services:
+            sysvinit:
+              gitlab-runner:
+                ensureRunning: 'true'
+                enabled: 'true'
+                files: ['/etc/gitlab-runner/config.toml']
+              rsyslog:
+                ensureRunning: 'true'
+                enabled: 'true'
+                files: ['/etc/rsyslog.d/25-gitlab-runner.conf']
     CreationPolicy:
       ResourceSignal:
         Timeout: 'PT15M'
@@ -340,6 +376,22 @@ Resources:
   ######################
   ### GitLab Runners ###
   ######################
+  RunnersRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: 'Allow'
+            Principal:
+              Service:
+                - 'ec2.amazonaws.com'
+            Action:
+              - 'sts:AssumeRole'
+  RunnersInstanceProfile:
+    Type: 'AWS::IAM::InstanceProfile'
+    Properties:
+      Roles:
+        - !Ref 'RunnersRole'
   RunnersSecurityGroup:
     Type: 'AWS::EC2::SecurityGroup'
     Properties:
