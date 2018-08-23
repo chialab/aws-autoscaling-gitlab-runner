@@ -344,7 +344,7 @@ Resources:
                   [runners.machine]
                     IdleCount = ${GitlabIdleCount}
                     IdleTime = ${GitlabIdleTime}
-                    MaxBuilds = ${GitlabMaxConcurrentBuilds}
+                    MaxBuilds = 100
                     MachineDriver = "amazonec2"
                     MachineName = "gitlab-docker-machine-%s"
                     MachineOptions = ["amazonec2-instance-type=${GitlabRunnerInstanceType}", "amazonec2-region=${AWS::Region}", "amazonec2-vpc-id=${VpcId}", "amazonec2-security-group=${AWS::StackName}-RunnersSecurityGroup", "amazonec2-use-private-address=true", "amazonec2-iam-instance-profile=${RunnersInstanceProfile}", "amazonec2-request-spot-instance=true", "amazonec2-spot-price=0.08"]
