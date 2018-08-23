@@ -33,10 +33,9 @@ Parameters:
     Description: |
       ID of VPC where resources will be created.
   SubnetId:
-    Type: 'String'
+    Type: 'AWS::EC2::Subnet::Id'
     Description: |
       ID of Subnet where resources will be created. 
-    Default: ''
   ManagerImageId:
     Type: 'AWS::EC2::Image::Id'
     Description: |
@@ -249,8 +248,7 @@ Resources:
       IamInstanceProfile: !Ref 'ManagerInstanceProfile'
       SecurityGroupIds:
         - !Ref 'ManagerSecurityGroup'
-      SubnetId:
-        - !Ref 'SubnetId'
+      SubnetId: !Ref 'SubnetId'
       Tags:
         - Key: 'Name'
           Value: !Ref 'AWS::StackName'
