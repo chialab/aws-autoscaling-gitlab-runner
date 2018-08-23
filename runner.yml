@@ -33,7 +33,7 @@ Parameters:
     Description: |
       ID of VPC where resources will be created.
   SubnetId:
-    Type: 'string'
+    Type: 'String'
     Description: |
       ID of Subnet where resources will be created. 
   ManagerImageId:
