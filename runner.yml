@@ -193,6 +193,7 @@ Resources:
               - Effect: 'Allow'
                 Action:
                   - 'ec2:CreateTags'
+                  - 'ssm:UpdateInstanceInformation'
                 Resource:
                   - '*'
                 Condition:
