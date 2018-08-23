@@ -330,7 +330,7 @@ Resources:
                   executor = "docker+machine"
                   [runners.docker]
                     tls_verify = false
-                    image = "ubuntu:latest"
+                    image = "alpine"
                     privileged = true
                     disable_cache = true
                     volumes = ["/cache"]
