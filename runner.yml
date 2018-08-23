@@ -33,7 +33,7 @@ Parameters:
     Description: |
       ID of VPC where resources will be created.
   SubnetId:
-    Type: 'AWS::EC2::Subnet::Id'
+    Type: 'string'
     Description: |
       ID of Subnet where resources will be created. 
   ManagerImageId:
