@@ -8,7 +8,7 @@ Metadata:
         Parameters: ['CacheBucketName', 'CacheExpirationInDays']
       - Label:
           default: 'EC2'
-        Parameters: ['VpcId', 'ManagerImageId', 'ManagerInstanceType', 'ManagerKeyPair', 'GitlabRunnerInstanceType']
+        Parameters: ['VpcId', 'SubnetId', 'ManagerImageId', 'ManagerInstanceType', 'ManagerKeyPair', 'GitlabRunnerInstanceType']
       - Label:
           default: 'GitLab'
         Parameters: ['GitlabUrl', 'GitlabToken']
