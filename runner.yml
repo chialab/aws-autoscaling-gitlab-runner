@@ -206,6 +206,7 @@ Resources:
               - Effect: 'Allow'
                 Action:
                   - 'ec2:RunInstances'
+                  - 'ec2:RequestSpotInstances'
                 Resource:
                   - '*'
                 Condition:
