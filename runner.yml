@@ -36,6 +36,7 @@ Parameters:
     Type: 'String'
     Description: |
       ID of Subnet where resources will be created. 
+    Default: ''
   ManagerImageId:
     Type: 'AWS::EC2::Image::Id'
     Description: |
