@@ -88,7 +88,7 @@ Parameters:
     Type: 'String'
     Description: |
       Timezone in which non-working hours are evaluated.
-    Default: 'Europe/Rome'
+    Default: 'Europe/Paris'
   GitlabOffPeakIdleCount:
     Type: 'Number'
     Description: |
@@ -350,7 +350,7 @@ Resources:
                     MachineName = "gitlab-docker-machine-%s"
                     MachineOptions = ["engine-storage-driver=overlay2", "amazonec2-instance-type=${GitlabRunnerInstanceType}", "amazonec2-region=${AWS::Region}", "amazonec2-vpc-id=${VpcId}", "amazonec2-security-group=${AWS::StackName}-RunnersSecurityGroup", "amazonec2-use-private-address=true", "amazonec2-iam-instance-profile=${RunnersInstanceProfile}", "amazonec2-request-spot-instance=true", "amazonec2-spot-price=0.08"]
                     OffPeakTimezone = "${GitlabOffPeakTimezone}"
-                    OffPeakPeriods = ["* * 0-9,18-23 * * mon-fri *", "* * * * * sat,sun *"]
+                    OffPeakPeriods = ["* * 0-8,18-23 * * mon-fri *", "* * * * * sat,sun *"]
                     OffPeakIdleCount = ${GitlabOffPeakIdleCount}
                     OffPeakIdleTime = ${GitlabOffPeakIdleTime}
             '/etc/rsyslog.d/25-gitlab-runner.conf':
