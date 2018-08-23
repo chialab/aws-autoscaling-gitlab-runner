@@ -248,7 +248,7 @@ Resources:
       IamInstanceProfile: !Ref 'ManagerInstanceProfile'
       SecurityGroupIds:
         - !Ref 'ManagerSecurityGroup'
-      SubnetIds:
+      SubnetId:
         - !Ref 'SubnetId'
       Tags:
         - Key: 'Name'
