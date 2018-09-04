@@ -360,7 +360,7 @@ Resources:
                         image = ${GitlabDockerImage}
                         privileged = true
                         disable_cache = true
-                        volumes = ["/cache"]
+                        volumes = ["/var/run/docker.sock:/var/run/docker.sock", "/cache"]
                         shm_size = 0
                       [runners.cache]
                         Type = "s3"
