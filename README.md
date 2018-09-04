@@ -23,7 +23,7 @@ If you want to create the stack within a specific VPC, you'll first need to crea
 
 Please note that docker-machine uses availability zone A per default therefore you'll need to have at minimum the 'A' zone available in your vpc. 
 
-*Note: This is something you can contribute to and propose a change request to add an availability zone selector...
+* **Note:** This is something you can contribute to and propose a change request to add an availability zone selector...
 
 Obtaining a GitLab Runner token
 -------------------------------
