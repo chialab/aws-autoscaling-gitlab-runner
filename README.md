@@ -16,6 +16,11 @@ Resources created
 * **1 EC2 instance** that is the runners' manager: it invokes AWS APIs to spawn
     and terminate other EC2 instances (via `docker-machine`) and runs Docker
     containers on them to process GitLab CI builds.
+    
+VPC consideration
+-----------------
+If not mentioned the script will use the default VPC. If you want to create the stack within a specific VPC, you'll first need to create it manualy. Please note that docker-machine uses availability zone A per default therefore you'll need to have at minimum the 'A' zone available in your vpc. 
+Note: This is something you can contribute to and propose a change request to add an availability zone selector...
 
 Obtaining a GitLab Runner token
 -------------------------------
