@@ -344,7 +344,7 @@ Resources:
               owner: 'gitlab-runner'
               group: 'gitlab-runner'
               mode: '000600'
-              content: 
+              content:
                 Fn::Sub:
                   - |
                     concurrent = ${GitlabMaxConcurrentBuilds}
@@ -357,7 +357,7 @@ Resources:
                       executor = "docker+machine"
                       [runners.docker]
                         tls_verify = false
-                        image = ${GitlabDockerImage}
+                        image = "${GitlabDockerImage}"
                         privileged = true
                         disable_cache = true
                         volumes = ["/var/run/docker.sock:/var/run/docker.sock", "/cache"]
@@ -379,9 +379,7 @@ Resources:
                         OffPeakPeriods = ["* * 0-8,18-23 * * mon-fri *", "* * * * * sat,sun *"]
                         OffPeakIdleCount = ${GitlabOffPeakIdleCount}
                         OffPeakIdleTime = ${GitlabOffPeakIdleTime}
-                  - {
-                      LocalSpotVar: !If [UseSpotInstances, !Sub ', "amazonec2-request-spot-instance=true", "amazonec2-spot-price=${GitLabRunnerSpotInstancePrice}"', '']
-                    }
+                  - LocalSpotVar: !If ['UseSpotInstances', !Sub ', "amazonec2-request-spot-instance=true", "amazonec2-spot-price=${GitLabRunnerSpotInstancePrice}"', '']
             '/etc/rsyslog.d/25-gitlab-runner.conf':
               owner: 'root'
               group: 'root'
