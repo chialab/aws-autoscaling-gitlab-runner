@@ -1,12 +1,12 @@
 sudo: false
 
-language: python
+language: 'python'
 
 install:
   - 'pip install awscli'
 
 script:
-  - 'for template in $(ls *.yml); do aws cloudformation validate-template --template-body file://$template; done'
+  - 'make test'
 
 before_deploy:
   - 'mkdir -p templates'

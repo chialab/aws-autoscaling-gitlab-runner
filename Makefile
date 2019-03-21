@@ -1,4 +1,9 @@
-.PHONY: list-instance-types list-latest-amis
+.PHONY: list-instance-types list-latest-amis test
+
+test:
+	@for template in $$(ls *.yml); do \
+		aws cloudformation validate-template --template-body file://$$template; \
+	done
 
 list-instance-types:
 	@instance_types=$$( \
