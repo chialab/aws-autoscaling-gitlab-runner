@@ -389,6 +389,7 @@ Resources:
             yum:
               'docker': []
               'gitlab-runner': []
+              'tzdata': []
           files:
             '/etc/cfn/cfn-hup.conf':
               owner: 'root'
