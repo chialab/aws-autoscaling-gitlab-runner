@@ -14,7 +14,7 @@ Metadata:
         Parameters: ['GitlabUrl', 'GitlabToken']
       - Label:
           default: 'Runner'
-        Parameters: ['GitLabRunnerSpotInstance', 'GitLabRunnerSpotInstancePrice', GitlabDockerImage', GitlabMaxBuilds', GitlabMaxConcurrentBuilds', 'GitlabIdleCount', 'GitlabIdleTime', 'GitlabOffPeakIdleCount', 'GitlabOffPeakIdleTime', 'GitlabOffPeakTimezone']
+        Parameters: ['GitLabRunnerSpotInstance', 'GitLabRunnerSpotInstancePrice', GitlabDockerImage', GitlabMaxBuilds', GitlabMaxConcurrentBuilds', 'GitlabIdleCount', 'GitlabIdleTime', 'GitlabOffPeakIdleCount', 'GitlabOffPeakIdleTime', 'GitlabOffPeakTimezone', 'GitlabCheckInterval']
 
 Parameters:
   CacheBucketName:
@@ -192,6 +192,12 @@ Parameters:
       Number of seconds of inactivity before an idle host is shut down during non-working hours.
     MinValue: 1
     Default: 1200
+  GitlabCheckInterval:
+    Type: 'Number'
+    Description: |
+      Number of seconds how often the Runner should check GitLab for new jobs.
+    MinValue: 0
+    Default: 0
   GitLabRunnerSpotInstance:
     Type: 'String'
     Description: |
@@ -429,7 +435,7 @@ Resources:
                 Fn::Sub:
                   - |
                     concurrent = ${GitlabMaxConcurrentBuilds}
-                    check_interval = 0
+                    check_interval = ${GitlabCheckInterval}
 
                     [[runners]]
                       name = "${AWS::StackName}"
