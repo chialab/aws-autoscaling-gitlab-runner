@@ -288,6 +288,11 @@ Resources:
             Statement:
               - Effect: 'Allow'
                 Action:
+                  - 'iam:CreateServiceLinkedRole'
+                Resource:
+                  - '*'
+              - Effect: 'Allow'
+                Action:
                   - 'ec2:CreateKeyPair'
                   - 'ec2:DeleteKeyPair'
                   - 'ec2:ImportKeyPair'
