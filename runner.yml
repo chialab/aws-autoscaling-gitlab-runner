@@ -531,5 +531,8 @@ Resources:
         AWSServiceName: !Sub 'spot.${AWS::URLSuffix}'
         # Custom suffix is not allowed for spot.amazonaws.com
         # CustomSuffix: !Sub '-${AWS::StackName}'
-        Description: !Sub 'Service-Linked Role for EC2 Spot Instances - ${AWS::StackName}'
+        #
+        # SLR Description must be consistent, see:
+        # https://github.com/chialab/aws-autoscaling-gitlab-runner/pull/12#issuecomment-476011524
+        Description: !Sub 'Service-Linked Role for EC2 Spot Instances'
     Condition: 'UseSpotInstances'
