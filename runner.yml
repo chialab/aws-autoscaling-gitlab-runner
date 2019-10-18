@@ -414,7 +414,7 @@ Resources:
                 runas=root
           commands:
             10-docker-machine:
-              command: 'curl -L https://github.com/docker/machine/releases/download/v0.14.0/docker-machine-`uname -s`-`uname -m` > /tmp/docker-machine && install /tmp/docker-machine /usr/bin/docker-machine'
+              command: 'curl -L https://github.com/docker/machine/releases/download/v0.16.2/docker-machine-`uname -s`-`uname -m` > /tmp/docker-machine && install /tmp/docker-machine /usr/bin/docker-machine'
             20-gitlab-runner-start:
               command: 'gitlab-runner start'
           services:
