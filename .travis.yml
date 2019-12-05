@@ -4,6 +4,7 @@ language: 'python'
 
 install:
   - 'pip install awscli'
+  - export PATH=$PATH:$HOME/.local/bin
 
 script:
   - 'make test'
