@@ -8,7 +8,7 @@ Metadata:
         Parameters: ['CacheBucketName', 'CacheExpirationInDays']
       - Label:
           default: 'EC2'
-        Parameters: ['VpcId', 'SubnetId', 'ManagerImageId', 'ManagerInstanceType', 'ManagerKeyPair', 'GitlabRunnerInstanceType']
+        Parameters: ['VpcId', 'SubnetId', 'ManagerInstanceType', 'ManagerKeyPair', 'GitlabRunnerInstanceType']
       - Label:
           default: 'GitLab'
         Parameters: ['GitlabUrl', 'GitlabToken']
@@ -41,50 +41,212 @@ Parameters:
     Type: 'AWS::EC2::Subnet::Id'
     Description: |
       ID of Subnet where resources will be created.
-  ManagerImageId:
-    Type: 'AWS::EC2::Image::Id'
-    Description: |
-      AMI for GitLab Runner's manager instance.
   ManagerInstanceType:
     Type: 'String'
     Description: |
       Instance type for GitLab Runners' manager.
-    AllowedValues: [
-      'c1.medium', 'c1.xlarge',
-      'c3.large', 'c3.xlarge', 'c3.2xlarge', 'c3.4xlarge', 'c3.8xlarge',
-      'c4.large', 'c4.xlarge', 'c4.2xlarge', 'c4.4xlarge', 'c4.8xlarge',
-      'c5.large', 'c5.xlarge', 'c5.2xlarge', 'c5.4xlarge', 'c5.9xlarge', 'c5.18xlarge',
-      'c5d.large', 'c5d.xlarge', 'c5d.2xlarge', 'c5d.4xlarge', 'c5d.9xlarge', 'c5d.18xlarge',
-      'cc2.8xlarge',
-      'cr1.8xlarge',
-      'd2.xlarge', 'd2.2xlarge', 'd2.4xlarge', 'd2.8xlarge',
-      'f1.2xlarge', 'f1.4xlarge', 'f1.16xlarge',
-      'g2.2xlarge', 'g2.8xlarge',
-      'g3.4xlarge', 'g3.8xlarge', 'g3.16xlarge',
-      'g3s.xlarge',
-      'h1.2xlarge', 'h1.4xlarge', 'h1.8xlarge', 'h1.16xlarge',
-      'hs1.8xlarge',
-      'i2.xlarge', 'i2.2xlarge', 'i2.4xlarge', 'i2.8xlarge',
-      'i3.large', 'i3.xlarge', 'i3.2xlarge', 'i3.4xlarge', 'i3.8xlarge', 'i3.16xlarge', 'i3.metal',
-      'm1.small', 'm1.medium', 'm1.large', 'm1.xlarge',
-      'm2.xlarge', 'm2.2xlarge', 'm2.4xlarge',
-      'm3.medium', 'm3.large', 'm3.xlarge', 'm3.2xlarge',
-      'm4.large', 'm4.xlarge', 'm4.2xlarge', 'm4.4xlarge', 'm4.10xlarge', 'm4.16xlarge',
-      'm5.large', 'm5.xlarge', 'm5.2xlarge', 'm5.4xlarge', 'm5.12xlarge', 'm5.24xlarge',
-      'm5d.large', 'm5d.xlarge', 'm5d.2xlarge', 'm5d.4xlarge', 'm5d.12xlarge', 'm5d.24xlarge',
-      'p2.xlarge', 'p2.8xlarge', 'p2.16xlarge',
-      'p3.2xlarge', 'p3.8xlarge', 'p3.16xlarge',
-      'r3.large', 'r3.xlarge', 'r3.2xlarge', 'r3.4xlarge', 'r3.8xlarge',
-      'r4.large', 'r4.xlarge', 'r4.2xlarge', 'r4.4xlarge', 'r4.8xlarge', 'r4.16xlarge',
-      'r5.large', 'r5.xlarge', 'r5.2xlarge', 'r5.4xlarge', 'r5.12xlarge', 'r5.24xlarge',
-      'r5d.large', 'r5d.xlarge', 'r5d.2xlarge', 'r5d.4xlarge', 'r5d.12xlarge', 'r5d.24xlarge',
-      't1.micro',
-      't2.nano', 't2.micro', 't2.small', 't2.medium', 't2.large', 't2.xlarge', 't2.2xlarge',
-      't3.nano', 't3.micro', 't3.small', 't3.medium', 't3.large', 't3.xlarge', 't3.2xlarge',
-      'x1.16xlarge', 'x1.32xlarge',
-      'x1e.xlarge', 'x1e.2xlarge', 'x1e.4xlarge', 'x1e.8xlarge', 'x1e.16xlarge', 'x1e.32xlarge',
-      'z1d.large', 'z1d.xlarge', 'z1d.2xlarge', 'z1d.3xlarge', 'z1d.6xlarge', 'z1d.12xlarge',
-    ]
+    AllowedValues:
+      - 'a1.2xlarge'
+      - 'a1.4xlarge'
+      - 'a1.large'
+      - 'a1.medium'
+      - 'a1.xlarge'
+      - 'a1'
+      - 'c1.medium'
+      - 'c1.xlarge'
+      - 'c3.2xlarge'
+      - 'c3.4xlarge'
+      - 'c3.8xlarge'
+      - 'c3.large'
+      - 'c3.xlarge'
+      - 'c3'
+      - 'c4.2xlarge'
+      - 'c4.4xlarge'
+      - 'c4.8xlarge'
+      - 'c4.large'
+      - 'c4.xlarge'
+      - 'c4'
+      - 'c5.18xlarge'
+      - 'c5.2xlarge'
+      - 'c5.4xlarge'
+      - 'c5.9xlarge'
+      - 'c5.large'
+      - 'c5.xlarge'
+      - 'c5'
+      - 'c5d.18xlarge'
+      - 'c5d.2xlarge'
+      - 'c5d.4xlarge'
+      - 'c5d.9xlarge'
+      - 'c5d.large'
+      - 'c5d.xlarge'
+      - 'c5d'
+      - 'c5n.18xlarge'
+      - 'c5n.2xlarge'
+      - 'c5n.4xlarge'
+      - 'c5n.9xlarge'
+      - 'c5n.large'
+      - 'c5n.xlarge'
+      - 'c5n'
+      - 'cc2.8xlarge'
+      - 'cr1.8xlarge'
+      - 'd2.2xlarge'
+      - 'd2.4xlarge'
+      - 'd2.8xlarge'
+      - 'd2.xlarge'
+      - 'd2'
+      - 'f1.16xlarge'
+      - 'f1.2xlarge'
+      - 'f1.4xlarge'
+      - 'f1'
+      - 'g2.2xlarge'
+      - 'g2.8xlarge'
+      - 'g2'
+      - 'g3.16xlarge'
+      - 'g3.4xlarge'
+      - 'g3.8xlarge'
+      - 'g3'
+      - 'g3s.xlarge'
+      - 'h1.16xlarge'
+      - 'h1.2xlarge'
+      - 'h1.4xlarge'
+      - 'h1.8xlarge'
+      - 'h1'
+      - 'hs1.8xlarge'
+      - 'i2.2xlarge'
+      - 'i2.4xlarge'
+      - 'i2.8xlarge'
+      - 'i2.xlarge'
+      - 'i2'
+      - 'i3.16xlarge'
+      - 'i3.2xlarge'
+      - 'i3.4xlarge'
+      - 'i3.8xlarge'
+      - 'i3.large'
+      - 'i3.metal'
+      - 'i3.xlarge'
+      - 'i3'
+      - 'm1.large'
+      - 'm1.medium'
+      - 'm1.small'
+      - 'm1.xlarge'
+      - 'm2.2xlarge'
+      - 'm2.4xlarge'
+      - 'm2.xlarge'
+      - 'm3.2xlarge'
+      - 'm3.large'
+      - 'm3.medium'
+      - 'm3.xlarge'
+      - 'm3'
+      - 'm4.10xlarge'
+      - 'm4.16xlarge'
+      - 'm4.2xlarge'
+      - 'm4.4xlarge'
+      - 'm4.large'
+      - 'm4.xlarge'
+      - 'm4'
+      - 'm5.12xlarge'
+      - 'm5.24xlarge'
+      - 'm5.2xlarge'
+      - 'm5.4xlarge'
+      - 'm5.large'
+      - 'm5.metal'
+      - 'm5.xlarge'
+      - 'm5'
+      - 'm5a.12xlarge'
+      - 'm5a.24xlarge'
+      - 'm5a.2xlarge'
+      - 'm5a.4xlarge'
+      - 'm5a.large'
+      - 'm5a.xlarge'
+      - 'm5d.12xlarge'
+      - 'm5d.24xlarge'
+      - 'm5d.2xlarge'
+      - 'm5d.4xlarge'
+      - 'm5d.large'
+      - 'm5d.metal'
+      - 'm5d.xlarge'
+      - 'm5d'
+      - 'p2.16xlarge'
+      - 'p2.8xlarge'
+      - 'p2.xlarge'
+      - 'p2'
+      - 'p3.16xlarge'
+      - 'p3.2xlarge'
+      - 'p3.8xlarge'
+      - 'p3'
+      - 'p3dn.24xlarge'
+      - 'p3dn'
+      - 'r3.2xlarge'
+      - 'r3.4xlarge'
+      - 'r3.8xlarge'
+      - 'r3.large'
+      - 'r3.xlarge'
+      - 'r3'
+      - 'r4.16xlarge'
+      - 'r4.2xlarge'
+      - 'r4.4xlarge'
+      - 'r4.8xlarge'
+      - 'r4.large'
+      - 'r4.xlarge'
+      - 'r4'
+      - 'r5.12xlarge'
+      - 'r5.24xlarge'
+      - 'r5.2xlarge'
+      - 'r5.4xlarge'
+      - 'r5.large'
+      - 'r5.metal'
+      - 'r5.xlarge'
+      - 'r5'
+      - 'r5a.12xlarge'
+      - 'r5a.24xlarge'
+      - 'r5a.2xlarge'
+      - 'r5a.4xlarge'
+      - 'r5a.large'
+      - 'r5a.xlarge'
+      - 'r5d.12xlarge'
+      - 'r5d.24xlarge'
+      - 'r5d.2xlarge'
+      - 'r5d.4xlarge'
+      - 'r5d.large'
+      - 'r5d.metal'
+      - 'r5d.xlarge'
+      - 'r5d'
+      - 't1.micro'
+      - 't2.2xlarge'
+      - 't2.large'
+      - 't2.medium'
+      - 't2.micro'
+      - 't2.nano'
+      - 't2.small'
+      - 't2.xlarge'
+      - 't3.2xlarge'
+      - 't3.large'
+      - 't3.medium'
+      - 't3.micro'
+      - 't3.nano'
+      - 't3.small'
+      - 't3.xlarge'
+      - 'u-12tb1'
+      - 'u-6tb1'
+      - 'u-9tb1'
+      - 'x1.16xlarge'
+      - 'x1.32xlarge'
+      - 'x1'
+      - 'x1e.16xlarge'
+      - 'x1e.2xlarge'
+      - 'x1e.32xlarge'
+      - 'x1e.4xlarge'
+      - 'x1e.8xlarge'
+      - 'x1e.xlarge'
+      - 'x1e'
+      - 'z1d.12xlarge'
+      - 'z1d.2xlarge'
+      - 'z1d.3xlarge'
+      - 'z1d.6xlarge'
+      - 'z1d.large'
+      - 'z1d.metal'
+      - 'z1d.xlarge'
+      - 'z1d'
     Default: 't3.nano'
   ManagerKeyPair:
     Type: 'AWS::EC2::KeyPair::KeyName'
@@ -104,42 +266,208 @@ Parameters:
     Type: 'String'
     Description: |
       Instance type for GitLab Runners.
-    AllowedValues: [
-      'c1.medium', 'c1.xlarge',
-      'c3.large', 'c3.xlarge', 'c3.2xlarge', 'c3.4xlarge', 'c3.8xlarge',
-      'c4.large', 'c4.xlarge', 'c4.2xlarge', 'c4.4xlarge', 'c4.8xlarge',
-      'c5.large', 'c5.xlarge', 'c5.2xlarge', 'c5.4xlarge', 'c5.9xlarge', 'c5.18xlarge',
-      'c5d.large', 'c5d.xlarge', 'c5d.2xlarge', 'c5d.4xlarge', 'c5d.9xlarge', 'c5d.18xlarge',
-      'cc2.8xlarge',
-      'cr1.8xlarge',
-      'd2.xlarge', 'd2.2xlarge', 'd2.4xlarge', 'd2.8xlarge',
-      'f1.2xlarge', 'f1.4xlarge', 'f1.16xlarge',
-      'g2.2xlarge', 'g2.8xlarge',
-      'g3.4xlarge', 'g3.8xlarge', 'g3.16xlarge',
-      'g3s.xlarge',
-      'h1.2xlarge', 'h1.4xlarge', 'h1.8xlarge', 'h1.16xlarge',
-      'hs1.8xlarge',
-      'i2.xlarge', 'i2.2xlarge', 'i2.4xlarge', 'i2.8xlarge',
-      'i3.large', 'i3.xlarge', 'i3.2xlarge', 'i3.4xlarge', 'i3.8xlarge', 'i3.16xlarge', 'i3.metal',
-      'm1.small', 'm1.medium', 'm1.large', 'm1.xlarge',
-      'm2.xlarge', 'm2.2xlarge', 'm2.4xlarge',
-      'm3.medium', 'm3.large', 'm3.xlarge', 'm3.2xlarge',
-      'm4.large', 'm4.xlarge', 'm4.2xlarge', 'm4.4xlarge', 'm4.10xlarge', 'm4.16xlarge',
-      'm5.large', 'm5.xlarge', 'm5.2xlarge', 'm5.4xlarge', 'm5.12xlarge', 'm5.24xlarge',
-      'm5d.large', 'm5d.xlarge', 'm5d.2xlarge', 'm5d.4xlarge', 'm5d.12xlarge', 'm5d.24xlarge',
-      'p2.xlarge', 'p2.8xlarge', 'p2.16xlarge',
-      'p3.2xlarge', 'p3.8xlarge', 'p3.16xlarge',
-      'r3.large', 'r3.xlarge', 'r3.2xlarge', 'r3.4xlarge', 'r3.8xlarge',
-      'r4.large', 'r4.xlarge', 'r4.2xlarge', 'r4.4xlarge', 'r4.8xlarge', 'r4.16xlarge',
-      'r5.large', 'r5.xlarge', 'r5.2xlarge', 'r5.4xlarge', 'r5.12xlarge', 'r5.24xlarge',
-      'r5d.large', 'r5d.xlarge', 'r5d.2xlarge', 'r5d.4xlarge', 'r5d.12xlarge', 'r5d.24xlarge',
-      't1.micro',
-      't2.nano', 't2.micro', 't2.small', 't2.medium', 't2.large', 't2.xlarge', 't2.2xlarge',
-      't3.nano', 't3.micro', 't3.small', 't3.medium', 't3.large', 't3.xlarge', 't3.2xlarge',
-      'x1.16xlarge', 'x1.32xlarge',
-      'x1e.xlarge', 'x1e.2xlarge', 'x1e.4xlarge', 'x1e.8xlarge', 'x1e.16xlarge', 'x1e.32xlarge',
-      'z1d.large', 'z1d.xlarge', 'z1d.2xlarge', 'z1d.3xlarge', 'z1d.6xlarge', 'z1d.12xlarge',
-    ]
+    AllowedValues:
+      - 'a1.2xlarge'
+      - 'a1.4xlarge'
+      - 'a1.large'
+      - 'a1.medium'
+      - 'a1.xlarge'
+      - 'a1'
+      - 'c1.medium'
+      - 'c1.xlarge'
+      - 'c3.2xlarge'
+      - 'c3.4xlarge'
+      - 'c3.8xlarge'
+      - 'c3.large'
+      - 'c3.xlarge'
+      - 'c3'
+      - 'c4.2xlarge'
+      - 'c4.4xlarge'
+      - 'c4.8xlarge'
+      - 'c4.large'
+      - 'c4.xlarge'
+      - 'c4'
+      - 'c5.18xlarge'
+      - 'c5.2xlarge'
+      - 'c5.4xlarge'
+      - 'c5.9xlarge'
+      - 'c5.large'
+      - 'c5.xlarge'
+      - 'c5'
+      - 'c5d.18xlarge'
+      - 'c5d.2xlarge'
+      - 'c5d.4xlarge'
+      - 'c5d.9xlarge'
+      - 'c5d.large'
+      - 'c5d.xlarge'
+      - 'c5d'
+      - 'c5n.18xlarge'
+      - 'c5n.2xlarge'
+      - 'c5n.4xlarge'
+      - 'c5n.9xlarge'
+      - 'c5n.large'
+      - 'c5n.xlarge'
+      - 'c5n'
+      - 'cc2.8xlarge'
+      - 'cr1.8xlarge'
+      - 'd2.2xlarge'
+      - 'd2.4xlarge'
+      - 'd2.8xlarge'
+      - 'd2.xlarge'
+      - 'd2'
+      - 'f1.16xlarge'
+      - 'f1.2xlarge'
+      - 'f1.4xlarge'
+      - 'f1'
+      - 'g2.2xlarge'
+      - 'g2.8xlarge'
+      - 'g2'
+      - 'g3.16xlarge'
+      - 'g3.4xlarge'
+      - 'g3.8xlarge'
+      - 'g3'
+      - 'g3s.xlarge'
+      - 'h1.16xlarge'
+      - 'h1.2xlarge'
+      - 'h1.4xlarge'
+      - 'h1.8xlarge'
+      - 'h1'
+      - 'hs1.8xlarge'
+      - 'i2.2xlarge'
+      - 'i2.4xlarge'
+      - 'i2.8xlarge'
+      - 'i2.xlarge'
+      - 'i2'
+      - 'i3.16xlarge'
+      - 'i3.2xlarge'
+      - 'i3.4xlarge'
+      - 'i3.8xlarge'
+      - 'i3.large'
+      - 'i3.metal'
+      - 'i3.xlarge'
+      - 'i3'
+      - 'm1.large'
+      - 'm1.medium'
+      - 'm1.small'
+      - 'm1.xlarge'
+      - 'm2.2xlarge'
+      - 'm2.4xlarge'
+      - 'm2.xlarge'
+      - 'm3.2xlarge'
+      - 'm3.large'
+      - 'm3.medium'
+      - 'm3.xlarge'
+      - 'm3'
+      - 'm4.10xlarge'
+      - 'm4.16xlarge'
+      - 'm4.2xlarge'
+      - 'm4.4xlarge'
+      - 'm4.large'
+      - 'm4.xlarge'
+      - 'm4'
+      - 'm5.12xlarge'
+      - 'm5.24xlarge'
+      - 'm5.2xlarge'
+      - 'm5.4xlarge'
+      - 'm5.large'
+      - 'm5.metal'
+      - 'm5.xlarge'
+      - 'm5'
+      - 'm5a.12xlarge'
+      - 'm5a.24xlarge'
+      - 'm5a.2xlarge'
+      - 'm5a.4xlarge'
+      - 'm5a.large'
+      - 'm5a.xlarge'
+      - 'm5d.12xlarge'
+      - 'm5d.24xlarge'
+      - 'm5d.2xlarge'
+      - 'm5d.4xlarge'
+      - 'm5d.large'
+      - 'm5d.metal'
+      - 'm5d.xlarge'
+      - 'm5d'
+      - 'p2.16xlarge'
+      - 'p2.8xlarge'
+      - 'p2.xlarge'
+      - 'p2'
+      - 'p3.16xlarge'
+      - 'p3.2xlarge'
+      - 'p3.8xlarge'
+      - 'p3'
+      - 'p3dn.24xlarge'
+      - 'p3dn'
+      - 'r3.2xlarge'
+      - 'r3.4xlarge'
+      - 'r3.8xlarge'
+      - 'r3.large'
+      - 'r3.xlarge'
+      - 'r3'
+      - 'r4.16xlarge'
+      - 'r4.2xlarge'
+      - 'r4.4xlarge'
+      - 'r4.8xlarge'
+      - 'r4.large'
+      - 'r4.xlarge'
+      - 'r4'
+      - 'r5.12xlarge'
+      - 'r5.24xlarge'
+      - 'r5.2xlarge'
+      - 'r5.4xlarge'
+      - 'r5.large'
+      - 'r5.metal'
+      - 'r5.xlarge'
+      - 'r5'
+      - 'r5a.12xlarge'
+      - 'r5a.24xlarge'
+      - 'r5a.2xlarge'
+      - 'r5a.4xlarge'
+      - 'r5a.large'
+      - 'r5a.xlarge'
+      - 'r5d.12xlarge'
+      - 'r5d.24xlarge'
+      - 'r5d.2xlarge'
+      - 'r5d.4xlarge'
+      - 'r5d.large'
+      - 'r5d.metal'
+      - 'r5d.xlarge'
+      - 'r5d'
+      - 't1.micro'
+      - 't2.2xlarge'
+      - 't2.large'
+      - 't2.medium'
+      - 't2.micro'
+      - 't2.nano'
+      - 't2.small'
+      - 't2.xlarge'
+      - 't3.2xlarge'
+      - 't3.large'
+      - 't3.medium'
+      - 't3.micro'
+      - 't3.nano'
+      - 't3.small'
+      - 't3.xlarge'
+      - 'u-12tb1'
+      - 'u-6tb1'
+      - 'u-9tb1'
+      - 'x1.16xlarge'
+      - 'x1.32xlarge'
+      - 'x1'
+      - 'x1e.16xlarge'
+      - 'x1e.2xlarge'
+      - 'x1e.32xlarge'
+      - 'x1e.4xlarge'
+      - 'x1e.8xlarge'
+      - 'x1e.xlarge'
+      - 'x1e'
+      - 'z1d.12xlarge'
+      - 'z1d.2xlarge'
+      - 'z1d.3xlarge'
+      - 'z1d.6xlarge'
+      - 'z1d.large'
+      - 'z1d.metal'
+      - 'z1d.xlarge'
+      - 'z1d'
     Default: 't3.micro'
   GitlabDockerImage:
     Type: 'String'
@@ -203,23 +531,58 @@ Parameters:
       Number of seconds how often the Runner should check GitLab for new jobs.
     MinValue: 0
     Default: 0
-  GitLabRunnerSpotInstance:
+  GitlabRunnerSpotInstance:
     Type: 'String'
     Description: |
       Will runners be spot instances?
     AllowedValues: ['Yes', 'No']
     Default: 'No'
-  GitLabRunnerSpotInstancePrice:
+  GitlabRunnerSpotInstancePrice:
     Type: 'Number'
     MinValue: 0
     Description: |
       Spot instance bid price.
     Default: 0.08
 
+Mappings:
+  Manager:
+    eu-north-1:
+      AmiId: 'ami-d16fe6af'
+    ap-south-1:
+      AmiId: 'ami-0889b8a448de4fc44'
+    eu-west-3:
+      AmiId: 'ami-0451ae4fd8dd178f7'
+    eu-west-2:
+      AmiId: 'ami-09ead922c1dad67e4'
+    eu-west-1:
+      AmiId: 'ami-07683a44e80cd32c5'
+    ap-northeast-2:
+      AmiId: 'ami-047f7b46bd6dd5d84'
+    ap-northeast-1:
+      AmiId: 'ami-0f9ae750e8274075b'
+    sa-east-1:
+      AmiId: 'ami-0669a96e355eac82f'
+    ca-central-1:
+      AmiId: 'ami-03338e1f67dae0168'
+    ap-southeast-1:
+      AmiId: 'ami-0b419c3a4b01d1859'
+    ap-southeast-2:
+      AmiId: 'ami-04481c741a0311bbb'
+    eu-central-1:
+      AmiId: 'ami-09def150731bdbcc2'
+    us-east-1:
+      AmiId: 'ami-0de53d8956e8dcf80'
+    us-east-2:
+      AmiId: 'ami-02bcbb802e03574ba'
+    us-west-1:
+      AmiId: 'ami-0019ef04ac50be30f'
+    us-west-2:
+      AmiId: 'ami-061392db613a6357b'
+
 Conditions:
   GivenBucketName: !Not [!Equals ['', !Ref 'CacheBucketName']]
   ExpireCacheObjects: !Not [!Equals [0, !Ref 'CacheExpirationInDays']]
-  UseSpotInstances: !Equals ['Yes', !Ref 'GitLabRunnerSpotInstance']
+  UseSpotInstances: !Equals ['Yes', !Ref 'GitlabRunnerSpotInstance']
 
 Outputs:
   CacheBucketName:
@@ -365,7 +728,7 @@ Resources:
   Manager:
     Type: 'AWS::EC2::Instance'
     Properties:
-      ImageId: !Ref 'ManagerImageId'
+      ImageId: !FindInMap ['Manager', !Ref 'AWS::Region', 'AmiId']
       InstanceType: !Ref 'ManagerInstanceType'
       KeyName: !Ref 'ManagerKeyPair'
       IamInstanceProfile: !Ref 'ManagerInstanceProfile'
@@ -492,7 +855,7 @@ Resources:
                         OffPeakPeriods = ["* * 0-8,18-23 * * mon-fri *", "* * * * * sat,sun *"]
                         OffPeakIdleCount = ${GitlabOffPeakIdleCount}
                         OffPeakIdleTime = ${GitlabOffPeakIdleTime}
-                  - LocalSpotVar: !If ['UseSpotInstances', !Sub ', "amazonec2-request-spot-instance=true", "amazonec2-spot-price=${GitLabRunnerSpotInstancePrice}"', '']
+                  - LocalSpotVar: !If ['UseSpotInstances', !Sub ', "amazonec2-request-spot-instance=true", "amazonec2-spot-price=${GitlabRunnerSpotInstancePrice}"', '']
             '/etc/rsyslog.d/25-gitlab-runner.conf':
               owner: 'root'
               group: 'root'
