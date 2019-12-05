@@ -453,7 +453,10 @@ Resources:
                       url = "${GitlabUrl}"
                       token = "${GitlabToken}"
                       executor = "docker+machine"
-                      environment = ["DOCKER_TLS_CERTDIR=/certs"]
+                      environment = [
+                        "DOCKER_DRIVER=overlay2",
+                        "DOCKER_TLS_CERTDIR=/certs"
+                      ]
                       [runners.docker]
                         tls_verify = false
                         image = "${GitlabDockerImage}"
