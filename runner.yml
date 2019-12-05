@@ -32,6 +32,11 @@ Parameters:
     Type: 'AWS::EC2::VPC::Id'
     Description: |
       ID of VPC where resources will be created.
+  AvailabilityZone:
+    Type: 'String'
+    Description: |
+      Name of AvailabilityZone where resources will be created. It needs to be set to the same zone as the specified subnet.
+    Default: a
   SubnetId:
     Type: 'AWS::EC2::Subnet::Id'
     Description: |
@@ -463,7 +468,17 @@ Resources:
                         MaxBuilds = ${GitlabMaxBuilds}
                         MachineDriver = "amazonec2"
                         MachineName = "gitlab-docker-machine-%s"
-                        MachineOptions = ["engine-storage-driver=overlay2", "amazonec2-instance-type=${GitlabRunnerInstanceType}", "amazonec2-region=${AWS::Region}", "amazonec2-vpc-id=${VpcId}", "amazonec2-security-group=${AWS::StackName}-RunnersSecurityGroup", "amazonec2-use-private-address=true", "amazonec2-iam-instance-profile=${RunnersInstanceProfile}" ${LocalSpotVar} ]
+                        MachineOptions = [
+                          "amazonec2-instance-type=${GitlabRunnerInstanceType}",
+                          "amazonec2-region=${AWS::Region}",
+                          "amazonec2-vpc-id=${VpcId}",
+                          "amazonec2-zone=${AvailabilityZone}",
+                          "amazonec2-subnet-id=${SubnetId}",
+                          "amazonec2-security-group=${AWS::StackName}-RunnersSecurityGroup",
+                          "amazonec2-use-private-address=true",
+                          "amazonec2-iam-instance-profile=${RunnersInstanceProfile}"
+                          ${LocalSpotVar}
+                        ]
                         OffPeakTimezone = "${GitlabOffPeakTimezone}"
                         OffPeakPeriods = ["* * 0-8,18-23 * * mon-fri *", "* * * * * sat,sun *"]
                         OffPeakIdleCount = ${GitlabOffPeakIdleCount}
