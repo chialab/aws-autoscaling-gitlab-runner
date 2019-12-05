@@ -8,7 +8,7 @@ Metadata:
         Parameters: ['CacheBucketName', 'CacheExpirationInDays']
       - Label:
           default: 'EC2'
-        Parameters: ['VpcId', 'SubnetId', 'ManagerInstanceType', 'ManagerKeyPair', 'GitlabRunnerInstanceType']
+        Parameters: ['VpcId', 'SubnetId', 'ManagerImageId', 'ManagerInstanceType', 'ManagerKeyPair', 'GitlabRunnerInstanceType']
       - Label:
           default: 'GitLab'
         Parameters: ['GitlabUrl', 'GitlabToken']
@@ -41,6 +41,10 @@ Parameters:
     Type: 'AWS::EC2::Subnet::Id'
     Description: |
       ID of Subnet where resources will be created.
+  ManagerImageId:
+    Type: 'AWS::EC2::Image::Id'
+    Description: |
+      AMI for GitLab Runner's manager instance. If empty uses image id from manager mapping.
   ManagerInstanceType:
     Type: 'String'
     Description: |
@@ -583,6 +587,7 @@ Conditions:
   GivenBucketName: !Not [!Equals ['', !Ref 'CacheBucketName']]
   ExpireCacheObjects: !Not [!Equals [0, !Ref 'CacheExpirationInDays']]
   UseSpotInstances: !Equals ['Yes', !Ref 'GitlabRunnerSpotInstance']
+  GivenManagerImageId: !Not [!Equals ['', !Ref 'ManagerImageId']]
 
 Outputs:
   CacheBucketName:
@@ -728,7 +733,10 @@ Resources:
   Manager:
     Type: 'AWS::EC2::Instance'
     Properties:
-      ImageId: !FindInMap ['Manager', !Ref 'AWS::Region', 'AmiId']
+      ImageId: !If
+        - 'GivenManagerImageId'
+        - !Ref ManagerImageId
+        - !FindInMap ['Manager', !Ref 'AWS::Region', 'AmiId']
       InstanceType: !Ref 'ManagerInstanceType'
       KeyName: !Ref 'ManagerKeyPair'
       IamInstanceProfile: !Ref 'ManagerInstanceProfile'
