@@ -45,6 +45,7 @@ Parameters:
     Type: 'AWS::EC2::Image::Id'
     Description: |
       AMI for GitLab Runner's manager instance. If empty uses image id from manager mapping.
+    Default: ''
   ManagerInstanceType:
     Type: 'String'
     Description: |
