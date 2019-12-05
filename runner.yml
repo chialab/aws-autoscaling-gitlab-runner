@@ -248,6 +248,10 @@ Resources:
             - Status: 'Enabled'
               ExpirationInDays: !Ref 'CacheExpirationInDays'
         - !Ref 'AWS::NoValue'
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
 
   #############################
   ### GitLab Runner Manager ###
