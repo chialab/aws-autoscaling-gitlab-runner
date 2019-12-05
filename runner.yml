@@ -14,7 +14,7 @@ Metadata:
         Parameters: ['GitlabUrl', 'GitlabToken']
       - Label:
           default: 'Runner'
-        Parameters: ['GitLabRunnerSpotInstance', 'GitLabRunnerSpotInstancePrice', GitlabDockerImage', GitlabMaxBuilds', GitlabMaxConcurrentBuilds', 'GitlabIdleCount', 'GitlabIdleTime', 'GitlabOffPeakIdleCount', 'GitlabOffPeakIdleTime', 'GitlabOffPeakTimezone', 'GitlabCheckInterval']
+        Parameters: ['GitLabRunnerSpotInstance', 'GitLabRunnerSpotInstancePrice', 'GitlabDockerImage', 'GitlabMaxBuilds', 'GitlabMaxConcurrentBuilds', 'GitlabIdleCount', 'GitlabIdleTime', 'GitlabOffPeakIdleCount', 'GitlabOffPeakIdleTime', 'GitlabOffPeakTimezone', 'GitlabCheckInterval']
 
 Parameters:
   CacheBucketName:
