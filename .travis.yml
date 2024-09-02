@@ -1,12 +1,13 @@
 sudo: false
 
-language: python
+language: 'python'
 
 install:
   - 'pip install awscli'
+  - export PATH=$PATH:$HOME/.local/bin
 
 script:
-  - 'for template in $(ls *.yml); do aws cloudformation validate-template --template-body file://$template; done'
+  - 'make test'
 
 before_deploy:
   - 'mkdir -p templates'
@@ -23,7 +24,7 @@ deploy:
     skip_cleanup: true
     local_dir: 'templates'
     on:
-      repo: 'Chialab/aws-autoscaling-gitlab-runner'
+      repo: 'chialab/aws-autoscaling-gitlab-runner'
       all_branches: true
   # Deploy templates in `s3://thebucket/org/repo/commit-sha`.
   - provider: 's3'
@@ -36,5 +37,5 @@ deploy:
     skip_cleanup: true
     local_dir: 'templates'
     on:
-      repo: 'Chialab/aws-autoscaling-gitlab-runner'
+      repo: 'chialab/aws-autoscaling-gitlab-runner'
       all_branches: true
