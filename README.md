@@ -1,3 +1,10 @@
+> [!CAUTION]
+> The Docker machine based auto-scaling executor for GitLab Runner is deprecated.
+> This project is now unmaintained and archived.
+>
+> We encourage you to migrate to the new [fleeting plugins](https://docs.gitlab.com/runner/executors/docker_autoscaler.html) for GitLab Runner.
+
+
 Autoscaling GitLab Runner on AWS [![Launch this stack on AWS](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home#/stacks/new?stackName=GitLabRunner&templateURL=https://s3-eu-west-1.amazonaws.com/chialab-cloudformation-templates/Chialab/aws-autoscaling-gitlab-runner/master/runner.yml)
 ================================================================================
 
