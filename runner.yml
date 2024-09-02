@@ -442,12 +442,13 @@ Resources:
                       url = "${GitlabUrl}"
                       token = "${GitlabToken}"
                       executor = "docker+machine"
+                      environment = ["DOCKER_TLS_CERTDIR=/certs"]
                       [runners.docker]
                         tls_verify = false
                         image = "${GitlabDockerImage}"
                         privileged = true
-                        disable_cache = true
-                        volumes = ["/var/run/docker.sock:/var/run/docker.sock", "/cache"]
+                        disable_cache = false
+                        volumes = ["/certs/client", "/cache"]
                         shm_size = 0
                       [runners.cache]
                         Type = "s3"
