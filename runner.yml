@@ -8,7 +8,7 @@ Metadata:
         Parameters: ['CacheBucketName', 'CacheExpirationInDays']
       - Label:
           default: 'EC2'
-        Parameters: ['VpcId', 'SubnetId', 'ManagerImageId', 'ManagerInstanceType', 'ManagerKeyPair', 'GitlabRunnerInstanceType']
+        Parameters: ['VpcId', 'SubnetId', 'ManagerImageId', 'ManagerInstanceType', 'ManagerKeyPair', 'GitlabRunnerInstanceType', 'ManagerSpotInstance', 'ManagerSpotInstancePrice']
       - Label:
           default: 'GitLab'
         Parameters: ['GitlabUrl', 'GitlabToken']
@@ -210,21 +210,30 @@ Parameters:
     Description: |
       Spot instance bid price.
     Default: 0.08
+  ManagerSpotInstance:
+    Type: 'String'
+    Description: |
+      Will manager be spot instances?
+    AllowedValues: ['Yes', 'No']
+    Default: 'No'
+  ManagerSpotInstancePrice:
+    Type: 'Number'
+    MinValue: 0
+    Description: |
+      Spot instance bid price.
+    Default: 0.002
 
 Conditions:
   GivenBucketName: !Not [!Equals ['', !Ref 'CacheBucketName']]
   ExpireCacheObjects: !Not [!Equals [0, !Ref 'CacheExpirationInDays']]
   UseSpotInstances: !Equals ['Yes', !Ref 'GitLabRunnerSpotInstance']
+  UseManagerSpotInstance: !Equals ['Yes', !Ref 'ManagerSpotInstance']
 
 Outputs:
   CacheBucketName:
     Description: |
       Name of created S3 bucket.
     Value: !Ref 'CacheBucket'
-  ManagerIP:
-    Description: |
-      IP of manager instance.
-    Value: !Ref 'ManagerEIP'
 
 Resources:
   ####################################
@@ -351,29 +360,45 @@ Resources:
     Properties:
       Roles:
         - !Ref 'ManagerRole'
-  Manager:
-    Type: 'AWS::EC2::Instance'
+  ManagerAutoScaling:
+    Type: 'AWS::AutoScaling::AutoScalingGroup'
     Properties:
+      AutoScalingGroupName: !Sub '${AWS::StackName}-ManagerInstanceGroup'
+      VPCZoneIdentifier:
+        - !Ref 'SubnetId'
+      LaunchConfigurationName: !Ref ManagerLaunchConfiguration
+      MinSize: 1
+      MaxSize: 1
+      Tags:
+        - Key: 'Name'
+          Value: !Ref 'AWS::StackName'
+          PropagateAtLaunch: True
+  ManagerLaunchConfiguration:
+    Type: 'AWS::AutoScaling::LaunchConfiguration'
+    Properties:
+      LaunchConfigurationName: !Sub '${AWS::StackName}-ManagerLaunchConfiguration'
+      AssociatePublicIpAddress: True
+      SpotPrice: !If
+        - 'UseManagerSpotInstance'
+        - !Ref 'ManagerSpotInstancePrice'
+        - !Ref 'AWS::NoValue'
       ImageId: !Ref 'ManagerImageId'
       InstanceType: !Ref 'ManagerInstanceType'
       KeyName: !Ref 'ManagerKeyPair'
       IamInstanceProfile: !Ref 'ManagerInstanceProfile'
-      SecurityGroupIds:
+      SecurityGroups:
         - !Ref 'ManagerSecurityGroup'
-      SubnetId: !Ref 'SubnetId'
-      Tags:
-        - Key: 'Name'
-          Value: !Ref 'AWS::StackName'
       UserData:
         Fn::Base64: !Sub |
           #!/bin/bash -xe
           yum update -y aws-cfn-bootstrap
 
           # Install the files and packages from the metadata
-          /opt/aws/bin/cfn-init --stack '${AWS::StackName}' --region '${AWS::Region}' --resource Manager --configsets default
+          /opt/aws/bin/cfn-init --stack '${AWS::StackName}' --region '${AWS::Region}' --resource ManagerLaunchConfiguration --configsets default
 
           # Signal the status from cfn-init
-          /opt/aws/bin/cfn-signal -e $? --stack '${AWS::StackName}' --region '${AWS::Region}' --resource Manager
+          /opt/aws/bin/cfn-signal -e $? --stack '${AWS::StackName}' --region '${AWS::Region}' --resource ManagerLaunchConfiguration
+
     Metadata:
       'AWS::CloudFormation::Init':
         configSets:
@@ -489,11 +514,6 @@ Resources:
         Timeout: 'PT15M'
     DependsOn:
       - 'RunnersSecurityGroup'
-  ManagerEIP:
-    Type: 'AWS::EC2::EIP'
-    Properties:
-      Domain: 'vpc'
-      InstanceId: !Ref 'Manager'
 
   ######################
   ### GitLab Runners ###
